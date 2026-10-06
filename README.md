@@ -1,12 +1,12 @@
 # terminal-chat 💬
 
-A small chatbot that runs in your terminal and can talk to either **Claude** or **OpenAI** models.
+A small chatbot that runs in your terminal and can talk to **Claude**, **OpenAI** or **Gemini** models.
 
 I wanted a quick way to try out different LLMs side by side without opening a bunch of browser tabs, so I put this together. It's intentionally small (two Python files) so it's easy to read and hack on.
 
 ## What it does
 
-- chat with Claude or GPT from the command line
+- chat with Claude, GPT or Gemini from the command line
 - responses stream in as they're generated
 - remembers the conversation during a session
 - a few handy commands: `/clear`, `/system`, `/save`, `/help`, `/quit`
@@ -28,6 +28,7 @@ Then set your key(s):
 ```bash
 export ANTHROPIC_API_KEY="your-key-here"
 export OPENAI_API_KEY="your-key-here"
+export GEMINI_API_KEY="your-key-here"   # free key from Google AI Studio
 ```
 
 You only need the key for the provider you're going to use.
@@ -40,6 +41,9 @@ python chat.py
 
 # use openai instead
 python chat.py --provider openai
+
+# or gemini
+python chat.py -p gemini
 
 # pick a specific model
 python chat.py -p openai -m gpt-4o
@@ -64,7 +68,8 @@ claude > Recursion is when a function solves a problem by calling itself on a sm
 
 ## Things I'd like to add
 
-- [ ] Gemini and a local model through Ollama
+- [x] Gemini
+- [ ] a local model through Ollama
 - [ ] ask both models the same question and show answers side by side
 - [ ] remember chats between sessions
 - [ ] show token usage / rough cost per message
