@@ -83,10 +83,49 @@ class GeminiProvider:
                 yield chunk.text
 
 
+class OllamaProvider:
+    """A model running on your own machine through Ollama. No API key, no cost, works offline."""
+
+    default_model = "llama3.2"
+
+    def __init__(self, model=None):
+        import requests
+
+        self.requests = requests
+        self.url = os.getenv("OLLAMA_URL", "http://localhost:11434")
+        self.model = model or os.getenv("OLLAMA_MODEL", self.default_model)
+        try:
+            self.requests.get(f"{self.url}/api/tags", timeout=2).raise_for_status()
+        except requests.RequestException:
+            raise RuntimeError(f"can't reach Ollama at {self.url}. is it running? (`ollama serve`)")
+
+    def stream(self, system, messages):
+        import json
+
+        payload = {
+            "model": self.model,
+            "messages": [{"role": "system", "content": system}] + messages,
+            "stream": True,
+        }
+        with self.requests.post(f"{self.url}/api/chat", json=payload, stream=True, timeout=300) as resp:
+            resp.raise_for_status()
+            # ollama streams one json object per line
+            for line in resp.iter_lines():
+                if not line:
+                    continue
+                data = json.loads(line)
+                if "error" in data:
+                    raise RuntimeError(data["error"])
+                yield data.get("message", {}).get("content", "")
+                if data.get("done"):
+                    break
+
+
 PROVIDERS = {
     "claude": ClaudeProvider,
     "openai": OpenAIProvider,
     "gemini": GeminiProvider,
+    "ollama": OllamaProvider,
 }
 
 
